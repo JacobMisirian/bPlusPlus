@@ -377,10 +377,21 @@ static struct ast_node * parse_access (struct parser * parser, struct ast_node *
 }
 
 static struct ast_node * parse_term (struct parser * parser) {
-  struct ast_node * node;
+  struct ast_node * expr;
 
-  if (match_tok (parser, TOK_INTEGER)) {
+  if        (match_tok (parser, TOK_INTEGER)) {
     return init_ast_node (INT_NODE, atoi (expect_tok (parser, TOK_INTEGER)->val), 0);
+  } else if (match_tok (parser, TOK_STRING)) {
+    return init_ast_node (STRING_NODE, 0, 1, copy_string (expect_tok (parser, TOK_STRING)->val));
+  } else if (match_tok (parser, TOK_IDENTIFIER)) {
+    return init_ast_node (ID_NODE, 0, 1, copy_string (expect_tok (parser, TOK_IDENTIFIER)->val));
+  } else if (accept_tok (parser, TOK_OPAREN)) {
+    expr = parse_expr (parser);
+    expect_tok (parser, TOK_CPAREN);
+    return expr;
+  } else {
+      printf ("Unexpected token %d with value \"%s\"\n", current_tok (parser)->type, current_tok (parser)->val);
+      exit (0);
   }
 }
 
