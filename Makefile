@@ -11,6 +11,10 @@ LFLAGS   = -Wall -I. -lm
 OBJECTS += src/main.o
 OBJECTS += src/token.o
 
+OBJECTS += src/emit/codegen.o
+OBJECTS += src/emit/scope.o
+OBJECTS += src/emit/symbol_table.o
+
 OBJECTS += src/lexer/lexer.o
 
 OBJECTS += src/parser/ast_node.o

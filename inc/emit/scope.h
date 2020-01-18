@@ -2,6 +2,7 @@
 #define _SCOPE_H_
 
 #include <stdlib.h>
+#include <string.h>
 
 #define SCOPE_SIZE 20
 

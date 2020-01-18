@@ -10,6 +10,7 @@ struct codegen * init_codegen (struct ast_node * ast) {
   return codegen;
 }
 
+static void accept_ast_node       (struct codegen * codegen, struct ast_node * node);
 static void accept_access_node    (struct codegen * codegen, struct ast_node * node);
 static void accept_assign_node    (struct codegen * codegen, struct ast_node * node);
 static void accept_bin_op_node    (struct codegen * codegen, struct ast_node * node);
@@ -36,7 +37,7 @@ void free_codegen (struct codegen * codegen) {
 }
 
 void codegen_run (struct codegen * codegen) {
-  accept_ast_node (codegen->ast);
+  accept_ast_node (codegen, codegen->ast);
 }
 
 static void accept_ast_node (struct codegen * codegen, struct ast_node * node) {
