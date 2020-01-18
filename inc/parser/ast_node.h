@@ -7,9 +7,10 @@
 #include <util/vector.h>
 
 typedef enum {
-  ASSIGN_NODE, BIN_OP_NODE,    BLOCK_NODE,     BREAK_NODE,    CONTINUE_NODE, EXPR_STMT_NODE,
-  FOR_NODE,    METH_CALL_NODE, METH_DECL_NODE, ID_NODE,       IF_NODE,       INDEX_NODE,
-  INT_NODE,    RETURN_NODE,    STRING_NODE,    UNARY_OP_NODE, WHILE_NODE,    VAR_DECL_NODE,
+  ACCESS_NODE,    ASSIGN_NODE, BIN_OP_NODE,    BLOCK_NODE,     BREAK_NODE,    CONTINUE_NODE,
+  EXPR_STMT_NODE, FOR_NODE,    METH_CALL_NODE, METH_DECL_NODE, ID_NODE,       IF_NODE,
+  INDEX_NODE,     INT_NODE,    RETURN_NODE,    STRING_NODE,    UNARY_OP_NODE, WHILE_NODE,
+  VAR_DECL_NODE,
 } node_type_t;
 
 typedef enum {
@@ -20,7 +21,7 @@ typedef enum {
 } bin_op_type_t;
 
 typedef enum {
-  BITWISE_NOT_UNARY_OP,
+  BITWISE_NOT_UNARY_OP, LOGICAL_NOT_UNARY_OP,
 } unary_op_type_t;
 
 typedef enum {

@@ -28,6 +28,15 @@ static struct ast_node * parse_expr_stmt (struct parser * parser);
 static struct ast_node * parse_expr   (struct parser * parser);
 static struct ast_node * parse_assign (struct parser * parser);
 static struct ast_node * parse_or     (struct parser * parser);
+static struct ast_node * parse_xor    (struct parser * parser);
+static struct ast_node * parse_and    (struct parser * parser);
+static struct ast_node * parse_eq     (struct parser * parser);
+static struct ast_node * parse_comp   (struct parser * parser);
+static struct ast_node * parse_add    (struct parser * parser);
+static struct ast_node * parse_mul    (struct parser * parser);
+static struct ast_node * parse_unary  (struct parser * parser);
+static struct ast_node * parse_access (struct parser * parser, struct ast_node * left);
+static struct ast_node * parse_term   (struct parser * parser);
 
 static bool match_tok                (struct parser * parser, token_type_t type);
 static bool match_tok_val            (struct parser * parser, token_type_t type, char * val);
@@ -226,12 +235,153 @@ static struct ast_node * parse_assign (struct parser * parser) {
         op_type = XOR_BIN_OP;
       }
 
+      return init_ast_node (ASSIGN_NODE, 0, 2, left,
+              init_ast_node (BIN_OP_NODE, op_type, 2, left, parse_assign (parser)));
     }
   }
 }
 
 static struct ast_node * parse_or (struct parser * parser) {
-  
+  struct ast_node * left;
+
+  left = parse_xor (parser);
+
+  while (accept_tok_val (parser, TOK_OP, "|")) {
+    left = init_ast_node (BIN_OP_NODE, BITWISE_OR_BIN_OP, 2, left, parse_or (parser));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_xor (struct parser * parser) {
+  struct ast_node * left;
+
+  left = parse_and (parser);
+
+  while (accept_tok_val (parser, TOK_OP, "^")) {
+    left = init_ast_node (BIN_OP_NODE, XOR_BIN_OP, 2, left, parse_xor (parser));
+  }
+}
+
+static struct ast_node * parse_and (struct parser * parser) {
+  struct ast_node * left;
+
+  left = parse_eq (parser);
+
+  while (accept_tok_val (parser, TOK_OP, "&")) {
+    left = init_ast_node (BIN_OP_NODE, BITWISE_AND_BIN_OP, 2, left, parse_and (parser));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_eq (struct parser * parser) {
+  struct ast_node * left;
+
+  left = parse_comp (parser);
+
+  if (accept_tok_val (parser, TOK_COMP, "==")) {
+    return init_ast_node (BIN_OP_NODE, EQUALITY_BIN_OP, 2, left, parse_eq (parser));
+  } else if (accept_tok_val (parser, TOK_COMP, "!=")) {
+    return init_ast_node (UNARY_OP_NODE, LOGICAL_NOT_UNARY_OP, 1,
+            init_ast_node (BIN_OP_NODE, EQUALITY_BIN_OP, 2, left, parse_eq (parser)));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_comp (struct parser * parser) {
+  struct ast_node * left;
+
+  left = parse_add (parser);
+
+  if        (accept_tok_val (parser, TOK_COMP, ">")) {
+    return init_ast_node (BIN_OP_NODE, GREATER_BIN_OP,          2, left, parse_comp (parser));
+  } else if (accept_tok_val (parser, TOK_COMP, ">=")) {
+    return init_ast_node (BIN_OP_NODE, GREATER_OR_EQUAL_BIN_OP, 2, left, parse_comp (parser));
+  } else if (accept_tok_val (parser, TOK_COMP, "<")) {
+    return init_ast_node (BIN_OP_NODE, LESSER_BIN_OP,           2, left, parse_comp (parser));
+  } else if (accept_tok_val (parser, TOK_COMP, "<=")) {
+    return init_ast_node (BIN_OP_NODE, LESSER_OR_EQUAL_BIN_OP,  2, left, parse_comp (parser));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_add (struct parser * parser) {
+  struct ast_node * left;
+
+  left = parse_mul (parser);
+
+  if        (accept_tok_val (parser, TOK_OP, "+")) {
+    return init_ast_node (BIN_OP_NODE, ADD_BIN_OP, 2, left, parse_add (parser));
+  } else if (accept_tok_val (parser, TOK_OP, "-")) {
+    return init_ast_node (BIN_OP_NODE, SUB_BIN_OP, 2, left, parse_add (parser));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_mul (struct parser * parser) {
+  struct ast_node * left;
+
+  left = parse_unary (parser);
+
+  if        (accept_tok_val (parser, TOK_OP, "*")) {
+    return init_ast_node (BIN_OP_NODE, MUL_BIN_OP, 2, left, parse_mul (parser));
+  } else if (accept_tok_val (parser, TOK_OP, "/")) {
+    return init_ast_node (BIN_OP_NODE, DIV_BIN_OP, 2, left, parse_mul (parser));
+  } else if (accept_tok_val (parser, TOK_OP, "%")) {
+    return init_ast_node (BIN_OP_NODE, MOD_BIN_OP, 2, left, parse_mul (parser));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_unary (struct parser * parser) {
+  if        (accept_tok_val (parser, TOK_OP, "!")) {
+    return init_ast_node (UNARY_OP_NODE, LOGICAL_NOT_UNARY_OP, 1, parse_unary (parser));
+  } else if (accept_tok_val (parser, TOK_OP, "~")) {
+    return init_ast_node (UNARY_OP_NODE, BITWISE_NOT_UNARY_OP, 1, parse_unary (parser));
+  }
+
+  return parse_access (parser, NULL);
+}
+
+static struct ast_node * parse_access (struct parser * parser, struct ast_node * left) {
+  struct ast_node * index;
+  struct vector   * args;
+
+  if (left == NULL) {
+    left = parse_term (parser);
+  }
+
+  if (accept_tok (parser, TOK_DOT)) {
+    return parse_access (parser, init_ast_node (ACCESS_NODE, 0, 2, left,
+                                  copy_string (expect_tok (parser, TOK_IDENTIFIER)->val)));
+  } else if (accept_tok (parser, TOK_OPAREN)) {
+    args = init_vector ();
+    while (!accept_tok (parser, TOK_CPAREN)) {
+      vector_push (args, parse_expr (parser));
+    }
+
+    return init_ast_node (METH_CALL_NODE, 0, 2, left, args);
+  } else if (accept_tok (parser, TOK_OSQUARE)) {
+    index = parse_expr (parser);
+    expect_tok (parser, TOK_CSQUARE);
+
+    return parse_access (parser, init_ast_node (INDEX_NODE, 0, 2, left, index));
+  }
+
+  return left;
+}
+
+static struct ast_node * parse_term (struct parser * parser) {
+  struct ast_node * node;
+
+  if (match_tok (parser, TOK_INTEGER)) {
+    return init_ast_node (INT_NODE, atoi (expect_tok (parser, TOK_INTEGER)->val), 0);
+  }
 }
 
 static bool match_tok (struct parser * parser, token_type_t type) {
