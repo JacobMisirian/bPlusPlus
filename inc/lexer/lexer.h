@@ -15,8 +15,8 @@ struct lexer {
   struct vector * tokens;
 };
 
-struct lexer * init_lexer (char         * file_path);
-void           free_lexer (struct lexer * lexer);
+struct lexer * lexer_init (char         * file_path);
+void           lexer_free (struct lexer * lexer);
 
 void lexer_scan (struct lexer * lexer);
 

@@ -1,6 +1,6 @@
 #include <emit/scope.h>
 
-struct scope * init_scope () {
+struct scope * scope_init () {
   struct scope * scope;
 
   scope = calloc (1, sizeof (struct scope));
@@ -13,7 +13,7 @@ struct scope * init_scope () {
   return scope;
 }
 
-void free_scope (struct scope * scope) {
+void scope_free (struct scope * scope) {
   free (scope->ids);
   free (scope->vals);
   free(scope);

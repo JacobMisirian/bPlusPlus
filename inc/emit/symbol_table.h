@@ -10,8 +10,8 @@ struct symbol_table {
   int             next;
 };
 
-struct symbol_table * init_symbol_table ();
-void                  free_symbol_table (struct symbol_table * symbol_table);
+struct symbol_table * symol_table_init ();
+void                  symol_table_free (struct symbol_table * symbol_table);
 
 void enter_scope     (struct symbol_table * table);
 int  get_symbol      (struct symbol_table * table, char * id);

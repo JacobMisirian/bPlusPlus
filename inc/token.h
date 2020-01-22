@@ -13,8 +13,8 @@ struct token {
   char       * val;
 };
 
-struct token * init_token (token_type_t   type, char * val, int size);
-void           free_token (struct token * token);
+struct token * token_init (token_type_t   type, char * val, int size);
+void           token_free (struct token * token);
 
 #define _TOKEN_H_
 

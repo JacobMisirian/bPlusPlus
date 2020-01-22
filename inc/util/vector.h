@@ -11,8 +11,8 @@ struct vector {
   int     size;
 };
 
-struct vector * init_vector ();
-void            free_vector (struct vector * vector);
+struct vector * vector_init ();
+void            vector_free (struct vector * vector);
 
 void   vector_push (struct vector * vector, void * ptr);
 void * vector_get  (struct vector * vector, int i);

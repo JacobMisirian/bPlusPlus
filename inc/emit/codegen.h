@@ -10,8 +10,8 @@ struct codegen {
   struct ast_node * ast;
 };
 
-struct codegen * init_codegen (struct ast_node * ast);
-void             free_codegen (struct codegen  * codegen);
+struct codegen * codegen_init (struct ast_node * ast);
+void             codegen_free (struct codegen  * codegen);
 
 void codegen_run (struct codegen * codegen);
 

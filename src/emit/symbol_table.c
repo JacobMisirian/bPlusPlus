@@ -1,27 +1,27 @@
 #include <emit/symbol_table.h>
 
-struct symbol_table * init_symbol_table () {
+struct symbol_table * symol_table_init () {
   struct symbol_table * table;
 
   table = calloc (1, sizeof (struct symbol_table));
 
-  table->scopes = init_vector ();
+  table->scopes = vector_init ();
   table->next   = 0;
 
   return table;
 }
 
-void free_symbol_table (struct symbol_table * table) {
+void symol_table_free (struct symbol_table * table) {
   for (int i = 0; i < table->scopes->count; i ++) {
-    free_scope (vector_get (table->scopes, i));
+    scope_free (vector_get (table->scopes, i));
   }
-  free_vector (table->scopes);
+  vector_free (table->scopes);
 
   free        (table);
 }
 
 void enter_scope (struct symbol_table * table) {
-  vector_push (table->scopes, init_scope ());
+  vector_push (table->scopes, scope_init ());
 }
 
 int get_symbol (struct symbol_table * table, char * id) {
@@ -51,7 +51,7 @@ int in_global_scope (struct symbol_table * table) {
 }
 
 void leave_scope (struct symbol_table * table) {
-  free_scope (vector_pop (table->scopes));
+  scope_free (vector_pop (table->scopes));
 }
 
 int tmp_symbol (struct symbol_table * table) {

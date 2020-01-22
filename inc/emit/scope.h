@@ -13,8 +13,8 @@ struct scope {
   int     size;
 };
 
-struct scope * init_scope ();
-void           free_scope (struct scope * scope);
+struct scope * scope_init ();
+void           scope_free (struct scope * scope);
 
 int  scope_get (struct scope * scope, char * id);
 void scope_set (struct scope * scope, char * id, int val);

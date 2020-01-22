@@ -5,7 +5,7 @@ int main (int argc, char * argv []) {
   struct vector * tokens;
   struct lexer  * lexer;
 
-  lexer = init_lexer ("printf (\"Hello, World\");");
+  lexer = lexer_init ("printf (\"Hello, World\");");
   lexer_scan (lexer);
 
   tokens = lexer->tokens;

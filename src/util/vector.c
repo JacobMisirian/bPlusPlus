@@ -1,6 +1,6 @@
 #include <util/vector.h>
 
-struct vector * init_vector () {
+struct vector * vector_init () {
   struct vector * vector;
 
   vector = calloc (1, sizeof (struct vector));
@@ -12,7 +12,7 @@ struct vector * init_vector () {
   return vector;
 }
 
-void free_vector (struct vector * vector) {
+void vector_free (struct vector * vector) {
   free (vector->data);
   free (vector);
 }

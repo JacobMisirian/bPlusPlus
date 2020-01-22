@@ -1,6 +1,6 @@
 #include <emit/codegen.h>
 
-struct codegen * init_codegen (struct ast_node * ast) {
+struct codegen * codegen_init (struct ast_node * ast) {
   struct codegen * codegen;
 
   codegen      = calloc (1, sizeof (struct codegen));
@@ -31,8 +31,8 @@ static void accept_unary_op_node  (struct codegen * codegen, struct ast_node * n
 static void accept_while_node     (struct codegen * codegen, struct ast_node * node);
 static void accept_var_decl_node  (struct codegen * codegen, struct ast_node * node);
 
-void free_codegen (struct codegen * codegen) {
-  free_ast_node (codegen->ast);
+void codegen_free (struct codegen * codegen) {
+  ast_node_free (codegen->ast);
   free          (codegen);
 }
 

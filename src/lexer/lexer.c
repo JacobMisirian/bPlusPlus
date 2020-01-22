@@ -1,6 +1,6 @@
 #include <lexer/lexer.h>
 
-struct lexer * init_lexer (char * source) {
+struct lexer * lexer_init (char * source) {
   struct lexer * lexer;
 
   lexer = calloc (1, sizeof(struct lexer));
@@ -8,14 +8,14 @@ struct lexer * init_lexer (char * source) {
   lexer->source = source;
   lexer->pos    = 0;
   lexer->len    = strlen(source);
-  lexer->tokens = init_vector ();
+  lexer->tokens = vector_init ();
 }
 
-void free_lexer (struct lexer * lexer) {
+void lexer_free (struct lexer * lexer) {
   for (int i = 0; i < lexer->tokens->count; i++) {
-    free_token (vector_get (lexer->tokens, i));
+    token_free (vector_get (lexer->tokens, i));
   }
-  free_vector (lexer->tokens);
+  vector_free (lexer->tokens);
 
   free        (lexer);
 }
@@ -201,7 +201,7 @@ static void scan_string (struct lexer * lexer) {
 }
 
 static void add_token (struct lexer * lexer, token_type_t type, char * val, int size) {
-  vector_push (lexer->tokens, init_token (type, val, size));
+  vector_push (lexer->tokens, token_init (type, val, size));
 }
 
 static void eat_whitespace (struct lexer * lexer) {

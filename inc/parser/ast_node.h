@@ -40,7 +40,7 @@ struct ast_node {
   int             arg;
 };
 
-struct ast_node * init_ast_node (node_type_t type, int arg, int child_count, ...);
-void              free_ast_node (struct ast_node * ast_node);
+struct ast_node * ast_node_init (node_type_t type, int arg, int child_count, ...);
+void              ast_node_free (struct ast_node * ast_node);
 
 #endif

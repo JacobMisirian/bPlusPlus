@@ -16,8 +16,8 @@ struct parser {
   int             len;
 };
 
-struct parser * init_parser (struct vector * tokens);
-void            free_parser (struct parser * parser);
+struct parser * parser_init (struct vector * tokens);
+void            parser_free (struct parser * parser);
 
 struct ast_node * parse ();
 

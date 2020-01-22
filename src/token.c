@@ -1,6 +1,6 @@
 #include <token.h>
 
-struct token * init_token (token_type_t type, char * val, int size) {
+struct token * token_init (token_type_t type, char * val, int size) {
   struct token * token;
 
   token = calloc (1, sizeof (struct token));
@@ -17,7 +17,7 @@ struct token * init_token (token_type_t type, char * val, int size) {
   return token;
 }
 
-void free_token (struct token * token) {
+void token_free (struct token * token) {
   if (token->val) {
     free (token->val);
   }
