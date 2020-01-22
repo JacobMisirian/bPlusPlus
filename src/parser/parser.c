@@ -61,23 +61,23 @@ struct ast_node * parse (struct parser * parser) {
 static struct ast_node * parse_statement (struct parser * parser) {
   struct ast_node * ret;
 
-  if (match_tok (parser, TOK_OBRACE)) {
+  if (match_tok (parser, OBRACE_TOK)) {
     ret = parse_block (parser);
-  } else if (match_tok_val (parser, TOK_IDENTIFIER, "for")) {
+  } else if (match_tok_val (parser, ID_TOK, "for")) {
     ret = parse_for (parser);
-  } else if (match_tok_val (parser, TOK_IDENTIFIER, "if")) {
+  } else if (match_tok_val (parser, ID_TOK, "if")) {
     ret = parse_if (parser);
-  } else if (match_tok_val (parser, TOK_IDENTIFIER, "func")) {
+  } else if (match_tok_val (parser, ID_TOK, "func")) {
     ret = parse_meth_decl (parser);
-  } else if (match_tok_val (parser, TOK_IDENTIFIER, "return")) {
+  } else if (match_tok_val (parser, ID_TOK, "return")) {
     ret = parse_return (parser);
-  } else if (match_tok_val (parser, TOK_IDENTIFIER, "while")) {
+  } else if (match_tok_val (parser, ID_TOK, "while")) {
     ret = parse_while (parser);
   } else {
     ret = parse_expr_stmt (parser);
   }
 
-  accept_tok (parser, TOK_SEMICOLON);
+  accept_tok (parser, SEMICOLON_TOK);
 
   return ret;
 }
@@ -87,8 +87,8 @@ static struct ast_node * parse_block (struct parser * parser) {
 
   children = init_vector ();
 
-  expect_tok (parser, TOK_OBRACE);
-  while (!accept_tok (parser, TOK_CBRACE)) {
+  expect_tok (parser, OBRACE_TOK);
+  while (!accept_tok (parser, CBRACE_TOK)) {
     vector_push (children, parse_statement (parser));
   }
 
@@ -101,14 +101,14 @@ static struct ast_node * parse_for (struct parser * parser) {
   struct ast_node * rep_stmt;
   struct ast_node * body;
 
-  expect_tok_val              (parser, TOK_IDENTIFIER, "for");
-  expect_tok                  (parser, TOK_OPAREN);
+  expect_tok_val              (parser, ID_TOK, "for");
+  expect_tok                  (parser, OPAREN_TOK);
   init_stmt = parse_statement (parser);
-  accept_tok                  (parser, TOK_SEMICOLON);
+  accept_tok                  (parser, SEMICOLON_TOK);
   expr      = parse_expr      (parser);
-  accept_tok                  (parser, TOK_SEMICOLON);
+  accept_tok                  (parser, SEMICOLON_TOK);
   rep_stmt  = parse_statement (parser);
-  expect_tok                  (parser, TOK_CPAREN);
+  expect_tok                  (parser, CPAREN_TOK);
   body      = parse_statement (parser);
 
   return init_ast_node (FOR_NODE, 0, 4, init_stmt, expr, rep_stmt, body);
@@ -119,13 +119,13 @@ static struct ast_node * parse_if (struct parser * parser) {
   struct ast_node * if_body;
   struct ast_node * else_body;
 
-  expect_tok_val            (parser, TOK_IDENTIFIER, "if");
-  expect_tok                (parser, TOK_OPAREN);
+  expect_tok_val            (parser, ID_TOK, "if");
+  expect_tok                (parser, OPAREN_TOK);
   expr    = parse_expr      (parser);
-  expect_tok                (parser, TOK_CPAREN);
+  expect_tok                (parser, CPAREN_TOK);
   if_body = parse_statement (parser);
 
-  if (accept_tok_val (parser, TOK_IDENTIFIER, "else")) {
+  if (accept_tok_val (parser, ID_TOK, "else")) {
     else_body = parse_statement (parser);
   } else {
     else_body = NULL;
@@ -143,25 +143,25 @@ static struct ast_node * parse_meth_decl (struct parser * parser) {
 
   params   = init_vector ();
 
-  expect_tok_val (parser, TOK_IDENTIFIER, "func");
-  name = copy_string (expect_tok (parser, TOK_IDENTIFIER)->val);
-  expect_tok (parser, TOK_OPAREN);
-  while (!accept_tok (parser, TOK_CPAREN)) {
+  expect_tok_val (parser, ID_TOK, "func");
+  name = copy_string (expect_tok (parser, ID_TOK)->val);
+  expect_tok (parser, OPAREN_TOK);
+  while (!accept_tok (parser, CPAREN_TOK)) {
     param = calloc (1, sizeof (struct method_param));
-    if (accept_tok_val (parser, TOK_OP, "*")) {
+    if (accept_tok_val (parser, OP_TOK, "*")) {
       param->param_type = pointer_param;
     } else {
       param->param_type = regular_param;
     }
 
-    param->id   = copy_string (expect_tok (parser, TOK_IDENTIFIER)->val);
-    expect_tok                (parser, TOK_COLON);
-    param->type = copy_string (expect_tok (parser, TOK_IDENTIFIER)->val);
+    param->id   = copy_string (expect_tok (parser, ID_TOK)->val);
+    expect_tok                (parser, COLON_TOK);
+    param->type = copy_string (expect_tok (parser, ID_TOK)->val);
 
-    accept_tok (parser, TOK_COMMA);
+    accept_tok (parser, COMMA_TOK);
   }
-  expect_tok (parser, TOK_COLON);
-  return_type = copy_string (expect_tok (parser, TOK_IDENTIFIER)->val);
+  expect_tok (parser, COLON_TOK);
+  return_type = copy_string (expect_tok (parser, ID_TOK)->val);
   body        = parse_statement (parser);
 
   return init_ast_node (METH_DECL_NODE, 0, 4, name, params, return_type, body);
@@ -170,7 +170,7 @@ static struct ast_node * parse_meth_decl (struct parser * parser) {
 static struct ast_node * parse_return (struct parser * parser) {
   struct ast_node * expr;
 
-  expect_tok_val (parser, TOK_IDENTIFIER, "return");
+  expect_tok_val (parser, ID_TOK, "return");
   expr = parse_expr (parser);
 
   return init_ast_node (RETURN_NODE, 0, 1, expr);
@@ -180,10 +180,10 @@ static struct ast_node * parse_while (struct parser * parser) {
   struct ast_node * expr;
   struct ast_node * body;
 
-  expect_tok_val         (parser, TOK_IDENTIFIER, "while");
-  expect_tok             (parser, TOK_OPAREN);
+  expect_tok_val         (parser, ID_TOK, "while");
+  expect_tok             (parser, OPAREN_TOK);
   expr = parse_expr      (parser);
-  expect_tok             (parser, TOK_CPAREN);
+  expect_tok             (parser, CPAREN_TOK);
   body = parse_statement (parser);
 
   return init_ast_node (WHILE_NODE, 0, 2, expr, body);
@@ -193,7 +193,7 @@ static struct ast_node * parse_expr_stmt (struct parser * parser) {
   struct ast_node * expr;
 
   expr = parse_expr (parser);
-  accept_tok (parser, TOK_SEMICOLON);
+  accept_tok (parser, SEMICOLON_TOK);
 
   return init_ast_node (EXPR_STMT_NODE, 0, 1, expr);
 }
@@ -209,8 +209,8 @@ static struct ast_node * parse_assign (struct parser * parser) {
 
   left = parse_or (parser);
 
-  if (match_tok (parser, TOK_ASSIGN)) {
-    op       = expect_tok (parser, TOK_ASSIGN)->val;
+  if (match_tok (parser, ASSIGN_TOK)) {
+    op       = expect_tok (parser, ASSIGN_TOK)->val;
 
     if (strcmp (op, "=") == 0) {
       return init_ast_node (ASSIGN_NODE, 0, 2, left, parse_assign (parser));
@@ -246,7 +246,7 @@ static struct ast_node * parse_or (struct parser * parser) {
 
   left = parse_xor (parser);
 
-  while (accept_tok_val (parser, TOK_OP, "|")) {
+  while (accept_tok_val (parser, OP_TOK, "|")) {
     left = init_ast_node (BIN_OP_NODE, BITWISE_OR_BIN_OP, 2, left, parse_or (parser));
   }
 
@@ -258,7 +258,7 @@ static struct ast_node * parse_xor (struct parser * parser) {
 
   left = parse_and (parser);
 
-  while (accept_tok_val (parser, TOK_OP, "^")) {
+  while (accept_tok_val (parser, OP_TOK, "^")) {
     left = init_ast_node (BIN_OP_NODE, XOR_BIN_OP, 2, left, parse_xor (parser));
   }
 }
@@ -268,7 +268,7 @@ static struct ast_node * parse_and (struct parser * parser) {
 
   left = parse_eq (parser);
 
-  while (accept_tok_val (parser, TOK_OP, "&")) {
+  while (accept_tok_val (parser, OP_TOK, "&")) {
     left = init_ast_node (BIN_OP_NODE, BITWISE_AND_BIN_OP, 2, left, parse_and (parser));
   }
 
@@ -280,9 +280,9 @@ static struct ast_node * parse_eq (struct parser * parser) {
 
   left = parse_comp (parser);
 
-  if (accept_tok_val (parser, TOK_COMP, "==")) {
+  if (accept_tok_val (parser, COMP_TOK, "==")) {
     return init_ast_node (BIN_OP_NODE, EQUALITY_BIN_OP, 2, left, parse_eq (parser));
-  } else if (accept_tok_val (parser, TOK_COMP, "!=")) {
+  } else if (accept_tok_val (parser, COMP_TOK, "!=")) {
     return init_ast_node (UNARY_OP_NODE, LOGICAL_NOT_UNARY_OP, 1,
             init_ast_node (BIN_OP_NODE, EQUALITY_BIN_OP, 2, left, parse_eq (parser)));
   }
@@ -295,13 +295,13 @@ static struct ast_node * parse_comp (struct parser * parser) {
 
   left = parse_add (parser);
 
-  if        (accept_tok_val (parser, TOK_COMP, ">")) {
+  if        (accept_tok_val (parser, COMP_TOK, ">")) {
     return init_ast_node (BIN_OP_NODE, GREATER_BIN_OP,          2, left, parse_comp (parser));
-  } else if (accept_tok_val (parser, TOK_COMP, ">=")) {
+  } else if (accept_tok_val (parser, COMP_TOK, ">=")) {
     return init_ast_node (BIN_OP_NODE, GREATER_OR_EQUAL_BIN_OP, 2, left, parse_comp (parser));
-  } else if (accept_tok_val (parser, TOK_COMP, "<")) {
+  } else if (accept_tok_val (parser, COMP_TOK, "<")) {
     return init_ast_node (BIN_OP_NODE, LESSER_BIN_OP,           2, left, parse_comp (parser));
-  } else if (accept_tok_val (parser, TOK_COMP, "<=")) {
+  } else if (accept_tok_val (parser, COMP_TOK, "<=")) {
     return init_ast_node (BIN_OP_NODE, LESSER_OR_EQUAL_BIN_OP,  2, left, parse_comp (parser));
   }
 
@@ -313,9 +313,9 @@ static struct ast_node * parse_add (struct parser * parser) {
 
   left = parse_mul (parser);
 
-  if        (accept_tok_val (parser, TOK_OP, "+")) {
+  if        (accept_tok_val (parser, OP_TOK, "+")) {
     return init_ast_node (BIN_OP_NODE, ADD_BIN_OP, 2, left, parse_add (parser));
-  } else if (accept_tok_val (parser, TOK_OP, "-")) {
+  } else if (accept_tok_val (parser, OP_TOK, "-")) {
     return init_ast_node (BIN_OP_NODE, SUB_BIN_OP, 2, left, parse_add (parser));
   }
 
@@ -327,11 +327,11 @@ static struct ast_node * parse_mul (struct parser * parser) {
 
   left = parse_unary (parser);
 
-  if        (accept_tok_val (parser, TOK_OP, "*")) {
+  if        (accept_tok_val (parser, OP_TOK, "*")) {
     return init_ast_node (BIN_OP_NODE, MUL_BIN_OP, 2, left, parse_mul (parser));
-  } else if (accept_tok_val (parser, TOK_OP, "/")) {
+  } else if (accept_tok_val (parser, OP_TOK, "/")) {
     return init_ast_node (BIN_OP_NODE, DIV_BIN_OP, 2, left, parse_mul (parser));
-  } else if (accept_tok_val (parser, TOK_OP, "%")) {
+  } else if (accept_tok_val (parser, OP_TOK, "%")) {
     return init_ast_node (BIN_OP_NODE, MOD_BIN_OP, 2, left, parse_mul (parser));
   }
 
@@ -339,9 +339,9 @@ static struct ast_node * parse_mul (struct parser * parser) {
 }
 
 static struct ast_node * parse_unary (struct parser * parser) {
-  if        (accept_tok_val (parser, TOK_OP, "!")) {
+  if        (accept_tok_val (parser, OP_TOK, "!")) {
     return init_ast_node (UNARY_OP_NODE, LOGICAL_NOT_UNARY_OP, 1, parse_unary (parser));
-  } else if (accept_tok_val (parser, TOK_OP, "~")) {
+  } else if (accept_tok_val (parser, OP_TOK, "~")) {
     return init_ast_node (UNARY_OP_NODE, BITWISE_NOT_UNARY_OP, 1, parse_unary (parser));
   }
 
@@ -356,19 +356,19 @@ static struct ast_node * parse_access (struct parser * parser, struct ast_node *
     left = parse_term (parser);
   }
 
-  if (accept_tok (parser, TOK_DOT)) {
+  if (accept_tok (parser, DOT_TOK)) {
     return parse_access (parser, init_ast_node (ACCESS_NODE, 0, 2, left,
-                                  copy_string (expect_tok (parser, TOK_IDENTIFIER)->val)));
-  } else if (accept_tok (parser, TOK_OPAREN)) {
+                                  copy_string (expect_tok (parser, ID_TOK)->val)));
+  } else if (accept_tok (parser, OPAREN_TOK)) {
     args = init_vector ();
-    while (!accept_tok (parser, TOK_CPAREN)) {
+    while (!accept_tok (parser, CPAREN_TOK)) {
       vector_push (args, parse_expr (parser));
     }
 
     return init_ast_node (METH_CALL_NODE, 0, 2, left, args);
-  } else if (accept_tok (parser, TOK_OSQUARE)) {
+  } else if (accept_tok (parser, OSQUARE_TOK)) {
     index = parse_expr (parser);
-    expect_tok (parser, TOK_CSQUARE);
+    expect_tok (parser, CSQUARE_TOK);
 
     return parse_access (parser, init_ast_node (INDEX_NODE, 0, 2, left, index));
   }
@@ -379,15 +379,15 @@ static struct ast_node * parse_access (struct parser * parser, struct ast_node *
 static struct ast_node * parse_term (struct parser * parser) {
   struct ast_node * expr;
 
-  if        (match_tok (parser, TOK_INTEGER)) {
-    return init_ast_node (INT_NODE, atoi (expect_tok (parser, TOK_INTEGER)->val), 0);
-  } else if (match_tok (parser, TOK_STRING)) {
-    return init_ast_node (STRING_NODE, 0, 1, copy_string (expect_tok (parser, TOK_STRING)->val));
-  } else if (match_tok (parser, TOK_IDENTIFIER)) {
-    return init_ast_node (ID_NODE, 0, 1, copy_string (expect_tok (parser, TOK_IDENTIFIER)->val));
-  } else if (accept_tok (parser, TOK_OPAREN)) {
+  if        (match_tok (parser, INT_TOK)) {
+    return init_ast_node (INT_NODE, atoi (expect_tok (parser, INT_TOK)->val), 0);
+  } else if (match_tok (parser, STRING_TOK)) {
+    return init_ast_node (STRING_NODE, 0, 1, copy_string (expect_tok (parser, STRING_TOK)->val));
+  } else if (match_tok (parser, ID_TOK)) {
+    return init_ast_node (ID_NODE, 0, 1, copy_string (expect_tok (parser, ID_TOK)->val));
+  } else if (accept_tok (parser, OPAREN_TOK)) {
     expr = parse_expr (parser);
-    expect_tok (parser, TOK_CPAREN);
+    expect_tok (parser, CPAREN_TOK);
     return expr;
   } else {
       printf ("Unexpected token %d with value \"%s\"\n", current_tok (parser)->type, current_tok (parser)->val);

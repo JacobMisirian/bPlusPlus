@@ -59,9 +59,9 @@ void lexer_scan (struct lexer * lexer) {
       case '/':
         if (next == '=') {
           read_char (lexer);
-          add_token (lexer, TOK_ASSIGN, &cur, 1);
+          add_token (lexer, ASSIGN_TOK, &cur, 1);
         } else {
-          add_token (lexer, TOK_OP, &cur, 1);
+          add_token (lexer, OP_TOK, &cur, 1);
         }
         break;
       case '=':
@@ -69,9 +69,9 @@ void lexer_scan (struct lexer * lexer) {
           tmp [0] = cur;
           tmp [1] = '=';
           read_char (lexer);
-          add_token (lexer, TOK_COMP, tmp, 2);
+          add_token (lexer, COMP_TOK, tmp, 2);
         } else {
-          add_token (lexer, TOK_ASSIGN, &cur, 1);
+          add_token (lexer, ASSIGN_TOK, &cur, 1);
         }
         break;
       case '!':
@@ -79,9 +79,9 @@ void lexer_scan (struct lexer * lexer) {
           tmp [0] = cur;
           tmp [1] = '=';
           read_char (lexer);
-          add_token (lexer, TOK_COMP, tmp, 2);
+          add_token (lexer, COMP_TOK, tmp, 2);
         } else {
-          add_token (lexer, TOK_OP, &cur, 1);
+          add_token (lexer, OP_TOK, &cur, 1);
         }
         break;
       case '<':
@@ -90,45 +90,45 @@ void lexer_scan (struct lexer * lexer) {
           tmp [0] = cur;
           tmp [1] = '=';
           read_char (lexer);
-          add_token (lexer, TOK_COMP, tmp, 2);
+          add_token (lexer, COMP_TOK, tmp, 2);
         } else if (cur == next) {
           tmp [0] = cur;
           tmp [1] = next;
           read_char (lexer);
-          add_token (lexer, TOK_OP, tmp, 2);
+          add_token (lexer, OP_TOK, tmp, 2);
         } else {
-          add_token (lexer, TOK_COMP, &cur, 1);
+          add_token (lexer, COMP_TOK, &cur, 1);
         }
         break;
       case '(':
-        add_token (lexer, TOK_OPAREN, 0, 0);
+        add_token (lexer, OPAREN_TOK, 0, 0);
         break;
       case ')':
-        add_token (lexer, TOK_CPAREN, 0, 0);
+        add_token (lexer, CPAREN_TOK, 0, 0);
         break;
       case '{':
-        add_token (lexer, TOK_OBRACE, 0, 0);
+        add_token (lexer, OBRACE_TOK, 0, 0);
         break;
       case '}':
-        add_token (lexer, TOK_CBRACE, 0, 0);
+        add_token (lexer, CBRACE_TOK, 0, 0);
         break;
       case '[':
-        add_token (lexer, TOK_OSQUARE, 0, 0);
+        add_token (lexer, OSQUARE_TOK, 0, 0);
         break;
       case ']':
-        add_token (lexer, TOK_CSQUARE, 0, 0);
+        add_token (lexer, CSQUARE_TOK, 0, 0);
         break;
       case ',':
-        add_token (lexer, TOK_COMMA, 0, 0);
+        add_token (lexer, COMMA_TOK, 0, 0);
         break;
       case '.':
-        add_token (lexer, TOK_DOT, 0, 0);
+        add_token (lexer, DOT_TOK, 0, 0);
         break;
       case ':':
-        add_token (lexer, TOK_COLON, 0, 0);
+        add_token (lexer, COLON_TOK, 0, 0);
         break;
       case ';':
-        add_token (lexer, TOK_SEMICOLON, 0, 0);
+        add_token (lexer, SEMICOLON_TOK, 0, 0);
         break;
       default:
         printf ("Unknown char %d '%c'\n", cur, cur);
@@ -155,7 +155,7 @@ static void scan_id (struct lexer * lexer) {
     len ++;
   }
 
-  add_token (lexer, TOK_IDENTIFIER, val, len);
+  add_token (lexer, ID_TOK, val, len);
 }
 
 static void scan_int (struct lexer * lexer) {
@@ -176,7 +176,7 @@ static void scan_int (struct lexer * lexer) {
     len ++;
   }
 
-  add_token (lexer, TOK_INTEGER, val, len);
+  add_token (lexer, INT_TOK, val, len);
 }
 
 static void scan_string (struct lexer * lexer) {
@@ -197,7 +197,7 @@ static void scan_string (struct lexer * lexer) {
     len ++;
   }
 
-  add_token (lexer, TOK_STRING, val, len);
+  add_token (lexer, STRING_TOK, val, len);
 }
 
 static void add_token (struct lexer * lexer, token_type_t type, char * val, int size) {
